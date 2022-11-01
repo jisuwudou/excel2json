@@ -38,7 +38,7 @@ namespace excel2json.GUI
         private String FileName;
         private List<string> records = new List<string>();
         private int record_cur_idx = -1;
-        private string record_path = "./../Record.txt";
+        private string record_path = "./../../Record.txt";
         /// <summary>
         /// 构造函数，初始化控件初值；创建文本框
         /// </summary>
