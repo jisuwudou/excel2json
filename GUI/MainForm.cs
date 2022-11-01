@@ -6,6 +6,9 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
+using System.IO;
+using System.Data;
+
 namespace excel2json.GUI
 {
 
@@ -33,7 +36,9 @@ namespace excel2json.GUI
 
         // 打开的excel文件名，不包含后缀xlsx。。。
         private String FileName;
-
+        private List<string> records = new List<string>();
+        private int record_cur_idx = -1;
+        private string record_path = "./../Record.txt";
         /// <summary>
         /// 构造函数，初始化控件初值；创建文本框
         /// </summary>
@@ -49,12 +54,44 @@ namespace excel2json.GUI
             mCSharpTextBox = createTextBoxInTab(this.tabCSharp);
             mCSharpTextBox.Language = Language.CSharp;
 
+
+            if (!File.Exists(record_path))
+            {
+                FileStream fs1 = new FileStream(record_path, FileMode.Create, FileAccess.Write);//创建写入文件 
+                StreamWriter sw = new StreamWriter(fs1);
+                //sw.WriteLine(this.textBox3.Text.Trim() + "+" + this.textBox4.Text);//开始写入值
+                //System.Console.WriteLine()
+                //sw.WriteLine("Init Flag");
+                sw.Close();
+                fs1.Close();
+            }
+            else
+            {
+                //StreamReader 简单读取
+                StreamReader sr = new StreamReader(record_path, Encoding.Default);//初始化读取 设置编码格式，否则中文会乱码
+                
+                string read_line = sr.ReadLine();
+                string show = "";
+                while(read_line != null)
+                {
+                    show += (" "+read_line);
+                    records.Add(show);
+                    read_line = sr.ReadLine();
+                }
+                System.Console.WriteLine(show);
+                sr.Close();
+                
+            }
+
+
             //-- componet init states
             this.comboBoxType.SelectedIndex = 0;
             this.comboBoxLowcase.SelectedIndex = 1;
             this.comboBoxHeader.SelectedIndex = 1;
             this.comboBoxDateFormat.SelectedIndex = 0;
             this.comboBoxSheetName.SelectedIndex = 1;
+            
+            this.comboBoxType.SelectedIndexChanged += comboBoxType_SelectedIndexChanged;
 
             this.comboBoxEncoding.Items.Clear();
             this.comboBoxEncoding.Items.Add("utf8-nobom");
@@ -128,8 +165,31 @@ namespace excel2json.GUI
 
             //-- update ui
             this.btnReimport.Enabled = true;
-            this.labelExcelFile.Text = path;
+            this.labelExcelFile.Text = System.IO.Path.GetFileName(path);
             enableExportButtons(false);
+
+            //读取默认状态
+            bool isDone = false;
+            for(int i = 0; i< records.Count; i++)
+            {
+                string[] element = records[i].Split(' ');
+                Console.WriteLine(records[i]);
+                if (element[0] != this.labelExcelFile.Text) continue;
+                
+                this.comboBoxType.SelectedIndex = Convert.ToInt32(element[1]);
+                record_cur_idx = i;
+                isDone = true;
+                break;
+            }
+
+            if(false == isDone)
+            {
+                string newre = this.labelExcelFile.Text + " 0";
+                records.Add(newre);
+                this.record_cur_idx = records.Count - 1;
+                this.comboBoxType.SelectedIndex = 0;
+                save_record();
+            }
 
             this.statusLabel.IsLink = false;
             this.statusLabel.Text = "Loading Excel ...";
@@ -149,6 +209,35 @@ namespace excel2json.GUI
 
             //-- start import
             this.backgroundWorker.RunWorkerAsync(options);
+        }
+
+
+        private void comboBoxType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (record_cur_idx == -1)
+                return;
+
+            string element = records[record_cur_idx];
+            string[] info = element.Split(' ');
+            info[1] = Convert.ToString( this.comboBoxType.SelectedIndex);
+            records[record_cur_idx] = info[0] + " " + info[1];
+            save_record();
+        }
+
+        private void save_record()
+        {
+            System.IO.File.WriteAllText(record_path, string.Empty);
+            FileStream fs1 = new FileStream(record_path, FileMode.Create, FileAccess.Write);//创建写入文件 
+            fs1.Position = 0;
+            StreamWriter sw = new StreamWriter(fs1);
+            
+            for (int i = 0; i < records.Count; i++)
+            {
+                sw.WriteLine(records[i]);
+            }
+
+            sw.Close();
+            fs1.Close();
         }
 
         /// <summary>

@@ -16,13 +16,14 @@
             base.Dispose(disposing);
         }
 
+
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent() {
+                /// <summary>
+                /// Required method for Designer support - do not modify
+                /// the contents of this method with the code editor.
+                /// </summary>
+            private void InitializeComponent() {
             System.Windows.Forms.Label label2;
             System.Windows.Forms.Label label1;
             System.Windows.Forms.Label label4;
@@ -485,6 +486,7 @@
             this.comboBoxType.Size = new System.Drawing.Size(150, 20);
             this.comboBoxType.TabIndex = 0;
             this.comboBoxType.ValueMember = "0";
+            
             // 
             // tabControlCode
             // 
@@ -589,4 +591,5 @@
         private System.Windows.Forms.CheckBox checkBoxCellJson;
         private System.Windows.Forms.CheckBox checkBoxAllString;
     }
+
 }
